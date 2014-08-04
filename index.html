@@ -4,7 +4,7 @@
     <style>canvas { width: 100%; height: 100% }</style>
   </head>
   <body>
-<script type="x-shader/x-vertex" id="basic-vertexShader">
+<script type="x-shader/x-vertex" id="terrain-vertexShader">
   varying vec3 vNormal;
   varying vec3 vPosition;
 
@@ -14,18 +14,18 @@
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 </script>
-<script type="x-shader/x-fragment" id="basic-fragmentShader">
+<script type="x-shader/x-fragment" id="terrain-fragmentShader">
   varying vec3 vPosition;
 
   void main() {
-    float threshold = -0.2;
+    float threshold = 0.2;
 
     vec3 stone = vec3(189.0/255.0, 192.0/255.0, 186.0/255.0);
     vec3 grass = vec3(123.0/255.0, 162.0/255.0, 63.0/255.0);
     vec3 dirt = vec3(125.0/255.0, 83.0/255.0, 44.0/255.0);
-    if(vPosition.y > 0.2) {
+    if(vPosition.y > 0.0) {
       gl_FragColor = vec4(stone, 1.0);
-    } else if(vPosition.y+sin((vPosition.x+vPosition.z)*5.0)/10.0 < threshold) {
+    } else if((sin(vPosition.x*25.0) + cos(vPosition.z*25.0))/125.0 > vPosition.y + threshold) {
       gl_FragColor = vec4(dirt, 1.0);
     } else {
       gl_FragColor = vec4(grass, 1.0);
@@ -33,6 +33,7 @@
   }
 </script>
 
+    <script src="threex.keyboardstate.js"></script>
     <script src="simplex-noise.min.js"></script>
     <script src="three.min.js"></script>
     <script src="game.js"></script>
