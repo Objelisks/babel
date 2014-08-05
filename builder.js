@@ -1,22 +1,6 @@
 define(function(require, exports) {
   var Loader = require('loader.js');
 
-  exports.Components = function(obj) {
-    return { original: obj };
-  }
-
-  exports.Components.prototype = {
-    this.gameObject = function() {
-      this.original.update = function(delta) {};
-    }
-    this.collider = function() {
-      this.original.collider = function() {
-        ;
-      }
-    }
-
-  }
-
   exports.buildPlayer = function() {
     var geometry = new THREE.SphereGeometry(0.25, 32, 32);
     var material = new THREE.MeshLambertMaterial({ color: 0xFB966E });
