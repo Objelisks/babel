@@ -17,9 +17,10 @@ define(function(require, exports) {
 
 
 
-  scene.add(new THREE.GridHelper(20, 1));
+  var gridHelper = new THREE.GridHelper(20, 1);
+  gridHelper.position.y -= 0.001;
+  scene.add(gridHelper);
   var axisHelper = new THREE.AxisHelper();
-  axisHelper.position.y += 0.001;
   scene.add(axisHelper);
 
   var light = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -47,6 +48,7 @@ define(function(require, exports) {
 
   var player = gameObject.construct(builder.buildPlayer())
     .addComponent('gamepad');
+  player.moveSpeed = 5.0;
   scene.add(player);
   gameObjects.push(player);
 
