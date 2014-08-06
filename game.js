@@ -38,13 +38,28 @@ define(function(require, exports) {
 
   for(var i=0; i<6; i++) {
     var tree = builder.buildTree();
-    tree.position.x = Math.random() * 10;
-    tree.position.z = Math.random() * 10;
+    tree.position.x = Math.random() * 20;
+    tree.position.z = Math.random() * 20;
     scene.add(tree);
   }
 
+  builder.loadModel('grass', function(model) {
+    for(var i=0; i<20; i++) {
+      var grassInstance = model.clone();
+      grassInstance.position.x = Math.random() * 20;
+      grassInstance.position.z = Math.random() * 20;
+      grassInstance.rotation.x = Math.random() * 0.2;
+      grassInstance.rotation.y = Math.random() * 0.4;
+      grassInstance.rotation.z = Math.random() * 0.2;
+      scene.add(grassInstance);
+    }
+  });
+
   var terrain = builder.buildTerrainMesh();
   scene.add(terrain);
+
+  var water = builder.buildWater();
+  scene.add(water);
 
   var player = gameObject.construct(builder.buildPlayer())
     .addComponent(input.gamepad(camera));
