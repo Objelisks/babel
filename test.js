@@ -12,23 +12,7 @@ define(function(require, exports) {
   }
 
   try {
-    gameObject.register('thing', function() {
-      return { x: 4 };
-    });
 
-    var obj = gameObject.construct({name: 'testobj'})
-      .addComponent('thing');
-
-    assert(obj['thing']);
-    assert(obj.thing.x === 4);
-
-    gameObject.register('otherThing', function() {
-      return { x: 5 };
-    });
-    obj.addComponent('otherThing');
-
-    assert(obj.thing.x === 4);
-    assert(obj.otherThing.x === 5);
 
   } finally {
     console.log('test results:', results);

@@ -47,7 +47,7 @@ define(function(require, exports) {
   scene.add(terrain);
 
   var player = gameObject.construct(builder.buildPlayer())
-    .addComponent('gamepad');
+    .addComponent(input.gamepad(camera));
   player.moveSpeed = 5.0;
   scene.add(player);
   gameObjects.push(player);
