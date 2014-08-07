@@ -1,3 +1,6 @@
+/**
+GAMEOBJECT MODULE
+*/
 define(function(require, exports) {
   var builders = {};
   var destructors = {};

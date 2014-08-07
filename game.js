@@ -1,7 +1,10 @@
+/**
+GAME MODULE
+*/
 define(function(require, exports) {
 
   // run tests
-  require('test.js');
+  //require('test.js');
 
   var builder = require('builder.js');
   var gameObject = require('gameObject.js');

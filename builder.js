@@ -1,3 +1,6 @@
+/**
+BUILDER MODULE
+*/
 define(function(require, exports) {
   var Loader = require('loader.js');
 
