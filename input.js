@@ -1,3 +1,7 @@
+
+/**
+INPUT MODULE
+*/
 define(function(require, exports) {
   var gameObject = require('gameObject.js');
   //var input = new THREEx.KeyboardState();

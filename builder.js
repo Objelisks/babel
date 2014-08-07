@@ -27,6 +27,64 @@ define(function(require, exports) {
     return cube;
   }
 
+  exports.buildTerrain = function(heightmap, typemap) {
+    var geometry = new THREE.Geometry();
+    var x = 0, y = 0, faceIndex = 0;
+    var width = heightmap.length-1;
+    var height = heightmap[0].length-1;
+    var v1, v2, v3, v4;
+    var scale = 2;
+
+    for(y = 0; y < height; y++) {
+      for(x = 0; x < width; x++) {
+        /*
+        assumption: all points are on at most two height levels
+        2 3
+        0 1
+
+        if 0 3 are equal height
+          faces 0,3,1 and 0,2,3
+        else
+          faces 0,2,1 and 1,2,3
+        */
+
+        v1 = new THREE.Vector3(x*scale, heightmap[x][y]/scale, y*scale);
+        v2 = new THREE.Vector3((x+1)*scale, heightmap[x+1][y]/scale, y*scale);
+        v3 = new THREE.Vector3(x*scale, heightmap[x][y+1]/scale, (y+1)*scale);
+        v4 = new THREE.Vector3((x+1)*scale, heightmap[x+1][y+1]/scale, (y+1)*scale);
+        geometry.vertices.push(v1, v2, v3, v4);
+
+        faceIndex = (y*width+x)*4;
+        if(v1.y === v4.y) {
+          geometry.faces.push(new THREE.Face3(faceIndex, faceIndex+3, faceIndex+1));
+          geometry.faces.push(new THREE.Face3(faceIndex, faceIndex+2, faceIndex+3));
+        } else {
+          geometry.faces.push(new THREE.Face3(faceIndex, faceIndex+2, faceIndex+1));
+          geometry.faces.push(new THREE.Face3(faceIndex+1, faceIndex+2, faceIndex+3));
+        }
+      }
+    }
+
+    geometry.mergeVertices();
+    geometry.computeFaceNormals();
+    geometry.computeBoundingSphere();
+
+    var material = new THREE.ShaderMaterial({
+      uniforms: {
+        color: { type:"v3", value: new THREE.Vector3(0.0, 1.0, 0.0) },
+        time: { type:"f", value: 1.0 },
+        resolution: { type: "v2", value: new THREE.Vector2() }
+      },
+      vertexShader: Loader.vertex('terrain'),
+      fragmentShader: Loader.fragment('terrain')
+    });
+
+    //var material = new THREE.MeshLambertMaterial({ color: 0x00aa00 });
+
+    var mesh = new THREE.Mesh(geometry, material);
+    return mesh;
+  }
+
   exports.buildTerrainMesh = function() {
     var geometry = new THREE.Geometry();
     var noise = new SimplexNoise();

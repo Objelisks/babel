@@ -9,6 +9,7 @@ define(function(require, exports) {
   var builder = require('builder.js');
   var gameObject = require('gameObject.js');
   var input = require('input.js');
+  var terrain = require('terrain.js');
   var gameObjects = [];
 
   var scene = new THREE.Scene();
@@ -58,8 +59,12 @@ define(function(require, exports) {
     }
   });
 
+/*
   var terrain = builder.buildTerrainMesh();
   scene.add(terrain);
+*/
+  var initChunk = terrain.loadChunk('0_0');
+  scene.add(initChunk);
 
   var water = builder.buildWater();
   scene.add(water);
