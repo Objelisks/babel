@@ -162,11 +162,11 @@ define(function(require, exports) {
   }
 
   exports.buildWater = function() {
-    var geometry = new THREE.PlaneGeometry(20, 20);
+    var geometry = new THREE.PlaneGeometry(40, 40);
     var material = new THREE.MeshLambertMaterial({ color: 0x86A697 });
     var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.x = 10;
-    mesh.position.z = 10;
+    mesh.position.x = 20;
+    mesh.position.z = 20;
     mesh.position.y = -0.3;
     mesh.rotation.x = -Math.PI/2;
     return mesh;

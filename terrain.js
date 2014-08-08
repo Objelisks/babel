@@ -89,8 +89,34 @@ var saveData = {
 var builder = require('builder.js');
 
 // TODO position chunks
-var CHUNK_WIDTH = 1000;
-var CHUNK_HEIGHT = 1000;
+var CHUNK_WIDTH = 20;
+var CHUNK_HEIGHT = 20;
+var DEFAULT_CHUNK_HEIGHTMAP = [
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
+var DEFAULT_CHUNK_TYPEMAP = [
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
 
 // TODO
 var positionHeight = function(terrain) {
@@ -98,67 +124,87 @@ var positionHeight = function(terrain) {
 	return 1;
 }
 
-exports.loadChunk = function(chunkName) {
-	// get file json
-	var file = loadJSON('./chunks/' + chunkName + '.json');
-	// TODO on error
-
-	var chunk = new THREE.Object3D();
-	chunk.coordinates = { 'x': 0, 'y': 0 };
-	chunk.terrain = builder.buildTerrain(file.heightmap, file.typemap); // TODO
-	chunk.add(chunk.terrain);
-
-	chunk.staticObjs = [];
-	file.staticObjs.each(function(staticObj) {
-		var obj = builder.buildStaticObj(staticObj); // TODO
-		obj.position.y = positionHeight(terrain);
-		chunk.staticObjs.push(obj);
-		chunk.add(obj);
-	});
-
-	chunk.dynamicObjs = [];
-	file.dynamicObjs.each(function(dynamicObj) {
-		var obj = builder.buildDynamicObj(dynamicObj); // TODO
-		obj.position.y = positionHeight(terrain);
-		obj.parentChunk = chunk;
-		chunk.dynamicObjs.push(obj);
-		// don't add to chunk, needs to be added to scene when loaded
-		// obj knows it's parent chunk, so remove only if it is out of sight and it's parent chunk is unloaded
-		// alternate: fade out at range
-	});
-
+var loadFileIntoChunk = function(file) {
 	return chunk;
 }
 
+exports.loadChunk = function(chunkName, callback) {
+	// get file json
+	loadJSONAsync('./chunks/' + chunkName + '.json', function(file) {
+		var chunk = new THREE.Object3D();
+		chunk.coordinates = { 'x': 0, 'y': 0 };
+		chunk.neighbors = file.neighbors;
+		chunk.terrain = builder.buildTerrain(file.heightmap, file.typemap);
+		chunk.add(chunk.terrain);
+
+		chunk.staticObjs = [];
+		file.staticObjs.each(function(staticObj) {
+			var obj = builder.buildStaticObj(staticObj); // TODO
+			obj.position.y = positionHeight(terrain);
+			chunk.staticObjs.push(obj);
+			chunk.add(obj);
+		});
+
+		chunk.dynamicObjs = [];
+		file.dynamicObjs.each(function(dynamicObj) {
+			var obj = builder.buildDynamicObj(dynamicObj); // TODO
+			obj.position.y = positionHeight(terrain);
+			obj.parentChunk = chunk;
+			chunk.dynamicObjs.push(obj);
+			// don't add to chunk, needs to be added to scene when loaded
+			// obj knows it's parent chunk, so remove only if it is out of sight and it's parent chunk is unloaded
+			// alternate: fade out at range
+		});
+
+		callback(chunk);
+	}, function() {
+		// File not found, load default chunk.
+		var chunk = new THREE.Object3D();
+		chunk.coordinates = { 'x': 0, 'y': 0 };
+		chunk.neighbors = [];
+		chunk.terrain = builder.buildTerrain(DEFAULT_CHUNK_HEIGHTMAP, DEFAULT_CHUNK_TYPEMAP);
+		chunk.add(chunk.terrain);
+
+		chunk.staticObjs = [];
+		chunk.dynamicObjs = [];
+
+		callback(chunk);
+	});
+
+}
+
 var coordStr = function(x, y) {
-	return '' + x + '_' + y;
+	return '' + x + ',' + y;
 }
 
 // TODO
-/*
-something.addEventListener('onchunkenter', function(chunk) {
-	var scene = getScene(); // TODO
+exports.loadNeighbors = function(chunk, callback) {
 	var coords = chunk.coordinates;
-	var neighbors = [];
-	neighbors.push(chunk.neighbors[coordStr(coords.x+1, coords.y+1)] || coordStr(coords.x+1, coords.y+1));
-	neighbors.push(chunk.neighbors[coordStr(coords.x+1, coords.y)] || coordStr(coords.x+1, coords.y));
-	neighbors.push(chunk.neighbors[coordStr(coords.x+1, coords.y-1)] || coordStr(coords.x+1, coords.y-1));
-	neighbors.push(chunk.neighbors[coordStr(coords.x, coords.y+1)] || coordStr(coords.x, coords.y+1));
-	neighbors.push(chunk.neighbors[coordStr(coords.x, coords.y-1)] || coordStr(coords.x, coords.y-1));
-	neighbors.push(chunk.neighbors[coordStr(coords.x-1, coords.y+1)] || coordStr(coords.x-1, coords.y+1));
-	neighbors.push(chunk.neighbors[coordStr(coords.x-1, coords.y)] || coordStr(coords.x-1, coords.y));
-	neighbors.push(chunk.neighbors[coordStr(coords.x-1, coords.y-1)] || coordStr(coords.x-1, coords.y-1));
-	chunk.neighbors.each(function(neighborOverride) {
-		neighbors[neighborOverride] = chunk.neighbors[neighborOverride];
+	var neighbors = {
+		'1,1': coordStr(coords.x+1, coords.y+1),
+		'1,0': coordStr(coords.x+1, coords.y),
+		'1,-1': coordStr(coords.x+1, coords.y-1),
+		'0,1': coordStr(coords.x, coords.y+1),
+		'0,-1': coordStr(coords.x, coords.y-1),
+		'-1,1': coordStr(coords.x-1, coords.y+1),
+		'-1,0': coordStr(coords.x-1, coords.y),
+		'-1,-1': coordStr(coords.x-1, coords.y-1)
+	};
+	chunk.neighbors.keys().each(function(neighborOverride) {
+		var key = neighborOverride.split(',');
+		neighbors[key] = chunk.neighbors[neighborOverride];
 	});
-	neighbors.each(function(chunkName) {
-		if(chunkname === 'empty') return;
-		var newChunk = exports.loadChunk(chunkName);
-		scene.add(newChunk);
-		scene.loadedChunks.push(newChunk);
+	console.log(neighbors);
+	neighbors.keys().each(function(relativeCoord) {
+		var chunkName = neighbors[relativeCoord];
+		var offset = relativeCoord.split(',').map(function(coord) { return parseInt(coord); });
+		if(chunkName === 'empty') return;
+		exports.loadChunk(chunkName, function(newChunk) {
+			newChunk.position.x += offset[0] * CHUNK_WIDTH;
+			newChunk.position.z += offset[1] * CHUNK_HEIGHT;
+			callback(newChunk);
+		});
 	});
-	// unload chunks
-});
-*/
+}
 
 });

@@ -39,6 +39,11 @@ define(function(require, exports) {
   cube.position.x = 5;
   cube.position.z = -2;
   scene.add(cube);
+  cube.update = function(delta) {
+    cube.rotation.x += 1 * delta;
+    cube.rotation.y += 1 * delta;
+  };
+  gameObjects.push(cube);
 
   for(var i=0; i<6; i++) {
     var tree = builder.buildTree();
@@ -59,45 +64,43 @@ define(function(require, exports) {
     }
   });
 
-/*
-  var terrain = builder.buildTerrainMesh();
-  scene.add(terrain);
-*/
-  var initChunk = terrain.loadChunk('0_0');
-  scene.add(initChunk);
+
+  var floor = [];
+  var addChunk = function(chunk) {
+    scene.add(chunk);
+    floor.push(chunk);
+  }
+
+  terrain.loadChunk('0,0', function(initChunk) {
+    addChunk(initChunk);
+    terrain.loadNeighbors(initChunk, addChunk);
+  });
 
   var water = builder.buildWater();
   scene.add(water);
 
+
   var player = gameObject.construct(builder.buildPlayer())
-    .addComponent(input.gamepad(camera));
+    .addComponent(input.gamepad(camera, floor));
   player.moveSpeed = 5.0;
+  player.height = 0.5;
   scene.add(player);
   gameObjects.push(player);
 
-  camera.position.z = -1.5;
-  camera.position.x = -1.5;
-  camera.position.y = 2.5;
-  camera.lookAt(new THREE.Vector3());
+  camera.position.set(-1.5, 2.5, -1.5);
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 
 
-  function update(delta) {
-    cube.rotation.x += 1 * delta;
-    cube.rotation.y += 1 * delta;
-
-    //handleInput(delta);
-
+  var update = function(delta) {
     gameObjects.each(function(obj) {
       obj.update(delta);
     });
-    camera.position.x = player.position.x - 1.5;
-    camera.position.z = player.position.z - 1.5;
   }
 
   var clock = new THREE.Clock(true);
 
-  function render() {
+  var render = function() {
     requestAnimationFrame(render);
     renderer.render(scene, camera);
     update(clock.getDelta());
