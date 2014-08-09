@@ -207,4 +207,8 @@ exports.loadNeighbors = function(chunk, callback) {
 	});
 }
 
+exports.saveChunk = function(name, data) {
+
+}
+
 });

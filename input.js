@@ -54,20 +54,23 @@ define(function(require, exports) {
         var updatedValues = navigator.getGamepads()[this.gamepadIndex];
         if(!updatedValues.connected) return;
 
+        var self = this;
+
 
         // Handle button presses
         var buttons = updatedValues.buttons;
         if(this.lastButtons !== null) {
           buttons.each(function(buttonValue, buttonIndex) {
-            if(buttonValue !== this.lastButtons[buttonIndex]) {
-              this.dispatchEvent({
-                'type': 'button' + buttonValue ? 'pressed' : 'released',
-                'message': buttonActionMap['joystick'][buttonIndex]
+            if(self.lastButtons[buttonIndex] !== undefined
+              && buttonValue.pressed !== self.lastButtons[buttonIndex]) {
+              exports.dispatchEvent({
+                'type': buttonActionMap['joystick'][buttonIndex] + (buttonValue.pressed ? 'pressed' : 'released'),
+                'message': buttonValue
               });
             }
+            self.lastButtons[buttonIndex] = buttonValue.pressed;
           });
         }
-        this.lastButtons = buttons;
 
 
         // Handle movement on joystick axes
@@ -148,6 +151,7 @@ define(function(require, exports) {
 
 
   // Final setup
+  // TODO check each frame for new gamepads the events don't work always
   Array.prototype.each.call(navigator.getGamepads(), function(gamepad) {
     onConnected({ 'gamepad': gamepad });
   });

@@ -3,107 +3,46 @@ GAME MODULE
 */
 define(function(require, exports) {
 
+  var world = require('world.js');
+  var input = require('input.js');
+
   // run tests
   //require('test.js');
-
-  var builder = require('builder.js');
-  var gameObject = require('gameObject.js');
-  var input = require('input.js');
-  var terrain = require('terrain.js');
-  var gameObjects = [];
-
-  var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
   var renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth * 0.90, window.innerHeight * 0.90);
   document.body.appendChild(renderer.domElement);
 
-
-
-  var gridHelper = new THREE.GridHelper(20, 1);
-  gridHelper.position.y -= 0.001;
-  scene.add(gridHelper);
-  var axisHelper = new THREE.AxisHelper();
-  scene.add(axisHelper);
-
-  var light = new THREE.DirectionalLight(0xffffff, 0.5);
-  light.position.x = -1;
-  light.position.y = 1;
-  light.position.z = 1;
-  scene.add(light);
-  light = new THREE.HemisphereLight(0xffffff, 0x404040, 0.5);
-  scene.add(light);
-
-  var cube = builder.buildCube();
-  cube.position.x = 5;
-  cube.position.z = -2;
-  scene.add(cube);
-  cube.update = function(delta) {
-    cube.rotation.x += 1 * delta;
-    cube.rotation.y += 1 * delta;
-  };
-  gameObjects.push(cube);
-
-  for(var i=0; i<6; i++) {
-    var tree = builder.buildTree();
-    tree.position.x = Math.random() * 20;
-    tree.position.z = Math.random() * 20;
-    scene.add(tree);
-  }
-
-  builder.loadModel('grass', function(model) {
-    for(var i=0; i<20; i++) {
-      var grassInstance = model.clone();
-      grassInstance.position.x = Math.random() * 20;
-      grassInstance.position.z = Math.random() * 20;
-      grassInstance.rotation.x = Math.random() * 0.2;
-      grassInstance.rotation.y = Math.random() * 0.4;
-      grassInstance.rotation.z = Math.random() * 0.2;
-      scene.add(grassInstance);
-    }
-  });
-
-
-  var floor = [];
-  var addChunk = function(chunk) {
-    scene.add(chunk);
-    floor.push(chunk);
-  }
-
-  terrain.loadChunk('0,0', function(initChunk) {
-    addChunk(initChunk);
-    terrain.loadNeighbors(initChunk, addChunk);
-  });
-
-  var water = builder.buildWater();
-  scene.add(water);
-
-
-  var player = gameObject.construct(builder.buildPlayer())
-    .addComponent(input.gamepad(camera, floor));
-  player.moveSpeed = 5.0;
-  player.height = 0.5;
-  scene.add(player);
-  gameObjects.push(player);
-
-  camera.position.set(-1.5, 2.5, -1.5);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-
-
-  var update = function(delta) {
-    gameObjects.each(function(obj) {
-      obj.update(delta);
-    });
-  }
-
   var clock = new THREE.Clock(true);
+
+
+  var cycleMode = (function() {
+    var modes = [
+      require('playMode.js'),
+      require('editMode.js')
+    ];
+    var currentMode = 0;
+    world.mode = modes[currentMode];
+    world.mode.activate();
+
+    return function() {
+      world.mode.deactivate();
+
+      currentMode = (currentMode + 1) % modes.length;
+      world.mode = modes[currentMode];
+
+      world.mode.activate();
+
+      console.log('mode:', currentMode);
+    }
+  })();
+
+  input.addEventListener('leftshoulderpressed', cycleMode);
 
   var render = function() {
     requestAnimationFrame(render);
-    renderer.render(scene, camera);
-    update(clock.getDelta());
+    renderer.render(world.scene, world.camera);
+    world.mode.update(clock.getDelta());
   }
   render();
 
