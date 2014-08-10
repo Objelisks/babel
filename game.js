@@ -5,6 +5,11 @@ define(function(require, exports) {
 
   var world = require('world.js');
   var input = require('input.js');
+  var builder = require('builder.js');
+  var gameObject = require('gameObject.js');
+  var player = require('player.js');
+  var playMode = require('playMode.js');
+  var editMode = require('editMode.js');
 
   // run tests
   //require('test.js');
@@ -15,14 +20,30 @@ define(function(require, exports) {
 
   var clock = new THREE.Clock(true);
 
+  world.scene = new THREE.Scene();
+  world.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+  var playerObj = gameObject.construct(builder.buildPlayer())
+    .addComponent(player.playerController);
+  playerObj.moveSpeed = 5.0;
+  playerObj.height = 0.5;
+
+  world.player = playerObj;
+  world.scene.add(playerObj);
+  world.gameObjects.push(playerObj);
+
+  world.camera.position.set(-1.5, 2.5, -1.5);
+  world.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
   var cycleMode = (function() {
     var modes = [
-      require('playMode.js'),
-      require('editMode.js')
+      playMode,
+      editMode
     ];
     var currentMode = 0;
     world.mode = modes[currentMode];
+    modes.each(function(mode) { mode.init(); });
+    modes.each(function(mode) { mode.deactivate(); });
     world.mode.activate();
 
     return function() {

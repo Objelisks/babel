@@ -2,7 +2,8 @@
 BUILDER MODULE
 */
 define(function(require, exports) {
-  var Loader = require('loader.js');
+  var loader = require('loader.js');
+  var terrain = require('terrain.js');
 
   exports.buildPlayer = function() {
     var geometry = new THREE.SphereGeometry(0.25, 32, 32);
@@ -20,8 +21,8 @@ define(function(require, exports) {
         time: { type:"f", value: 1.0 },
         resolution: { type: "v2", value: new THREE.Vector2() }
       },
-      vertexShader: Loader.vertex('terrain'),
-      fragmentShader: Loader.fragment('terrain')
+      vertexShader: loader.vertex('terrain'),
+      fragmentShader: loader.fragment('terrain')
     });
     var cube = new THREE.Mesh(geometry, material);
     return cube;
@@ -33,7 +34,7 @@ define(function(require, exports) {
     var width = heightmap.length-1;
     var height = heightmap[0].length-1;
     var v1, v2, v3, v4;
-    var scale = 2;
+    var scale = terrain.tileScale;
 
     for(y = 0; y < height; y++) {
       for(x = 0; x < width; x++) {
@@ -75,8 +76,8 @@ define(function(require, exports) {
         time: { type:"f", value: 1.0 },
         resolution: { type: "v2", value: new THREE.Vector2() }
       },
-      vertexShader: Loader.vertex('terrain'),
-      fragmentShader: Loader.fragment('terrain')
+      vertexShader: loader.vertex('terrain'),
+      fragmentShader: loader.fragment('terrain')
     });
 
     //var material = new THREE.MeshLambertMaterial({ color: 0x00aa00 });
@@ -143,8 +144,8 @@ define(function(require, exports) {
         time: { type:"f", value: 1.0 },
         resolution: { type: "v2", value: new THREE.Vector2() }
       },
-      vertexShader: Loader.vertex('terrain'),
-      fragmentShader: Loader.fragment('terrain')
+      vertexShader: loader.vertex('terrain'),
+      fragmentShader: loader.fragment('terrain')
     });
 
     //var material = new THREE.MeshLambertMaterial({ color: 0x00aa00 });

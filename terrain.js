@@ -117,6 +117,7 @@ var DEFAULT_CHUNK_TYPEMAP = [
 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
+exports.tileScale = 2;
 
 // TODO
 var positionHeight = function(terrain) {
