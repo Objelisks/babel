@@ -37,9 +37,10 @@ define(function(require, exports) {
   }
 
 	exports.update = function(delta) {
-    world.gameObjects.each(function(obj) {
+    world.player.update(delta);
+    /*world.gameObjects.each(function(obj) {
       obj.update(delta);
-    });
+    });*/
 
     debugObjects.each(function(obj) {
       if(obj.update) {

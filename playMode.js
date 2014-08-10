@@ -6,6 +6,7 @@ define(function(require, exports) {
   var gameObject = require('gameObject.js');
   var input = require('input.js');
   var terrain = require('terrain.js');
+  var player = require('player.js');
 
   // Common mode state
   var world = require('world.js');
@@ -74,14 +75,14 @@ define(function(require, exports) {
   world.scene.add(water);
 
 
-  var player = gameObject.construct(builder.buildPlayer())
-    .addComponent(input.gamepad(world.camera, world.chunks));
-  player.moveSpeed = 5.0;
-  player.height = 0.5;
+  var playerObj = gameObject.construct(builder.buildPlayer())
+    .addComponent(player.playerController);
+  playerObj.moveSpeed = 5.0;
+  playerObj.height = 0.5;
 
-  world.player = player;
-  world.scene.add(player);
-  world.gameObjects.push(player);
+  world.player = playerObj;
+  world.scene.add(playerObj);
+  world.gameObjects.push(playerObj);
 
   world.camera.position.set(-1.5, 2.5, -1.5);
   world.camera.lookAt(new THREE.Vector3(0, 0, 0));

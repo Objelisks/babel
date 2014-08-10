@@ -37,12 +37,14 @@ define(function(require, exports) {
     }
   })();
 
-  input.addEventListener('leftshoulderpressed', cycleMode);
+  input.primary.addEventListener('leftshoulderpressed', cycleMode);
 
   var render = function() {
     requestAnimationFrame(render);
     renderer.render(world.scene, world.camera);
-    world.mode.update(clock.getDelta());
+    var delta = clock.getDelta();
+    input.update(delta);
+    world.mode.update(delta);
   }
   render();
 
