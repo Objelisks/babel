@@ -9,6 +9,7 @@ define(function(require, exports) {
   var player = require('player.js');
   var playMode = require('playMode.js');
   var editMode = require('editMode.js');
+  var terrain = require('terrain.js');
 
   // run tests
   //require('test.js');

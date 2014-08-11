@@ -55,16 +55,8 @@ define(function(require, exports) {
       }
     });
 
-
-    var addChunk = function(chunk) {
-      world.scene.add(chunk);
-      world.chunks.push(chunk);
-    }
-
-    terrain.loadChunk('0,0', function(initChunk) {
-      addChunk(initChunk);
-      terrain.loadNeighbors(initChunk, addChunk);
-    });
+    terrain.loadChunkAndNeighbors('0,0');
+    terrain.loadChunkAndNeighbors('-1,0');
 
     var water = builder.buildWater();
     world.scene.add(water);

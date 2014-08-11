@@ -1,6 +1,5 @@
 var http = require('http');
 var fs = require('fs');
-var request = require('request');
 
 var saveDirectory = __dirname + '/chunks/';
 

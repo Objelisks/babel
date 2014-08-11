@@ -15,18 +15,12 @@ define(function(require, exports) {
   var saveServer = 'http://localhost:3000';
 
   var lowerTerrain = function() {
-    var pos = world.player.position.clone();
-    var x = Math.round(pos.x / tileScale);
-    var y = Math.round(pos.z / tileScale);
-
-    terrain.editTerrain(x, y, -1);
+    var pos = world.player.position;
+    terrain.editTerrain(pos.x, pos.z, -1);
   };
   var raiseTerrain = function() {
-    var pos = world.player.position.clone();
-    var x = Math.round(pos.x / tileScale);
-    var y = Math.round(pos.z / tileScale);
-
-    terrain.editTerrain(x, y, 1);
+    var pos = world.player.position;
+    terrain.editTerrain(pos.x, pos.z, 1);
   };
 
   var saveChunks = function() {
@@ -36,7 +30,6 @@ define(function(require, exports) {
           'name': chunk.name,
           'heightmap': chunk.heightmap,
           'typemap': chunk.typemap,
-          'neighbors': chunk.neighbors,
           'staticObjs': [],
           'dynamicObjs': []
         };

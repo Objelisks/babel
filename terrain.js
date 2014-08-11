@@ -84,8 +84,9 @@ define(function(require, exports) {
 	var loader = require('loader.js');
 
 	// TODO position chunks
-	var CHUNK_WIDTH = 20;
-	var CHUNK_HEIGHT = 20;
+	var tileScale = exports.tileScale = 2;
+	var CHUNK_SIZE_MAP = 10;
+	var CHUNK_SIZE_WORLD = CHUNK_SIZE_MAP * tileScale;
 	var DEFAULT_CHUNK_HEIGHTMAP = [
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -112,7 +113,6 @@ define(function(require, exports) {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	];
-	var tileScale = exports.tileScale = 2;
 
 	// From THREE.Geometry.center
 	var centerGeometryXZ = function() {
@@ -133,7 +133,9 @@ define(function(require, exports) {
     var geometry = new THREE.Geometry();
     var x = 0, y = 0, faceIndex = 0;
     var width = heightmap.length-1;
+    if(width != CHUNK_SIZE_MAP) console.log('ERROR: tilemap has incorrect width:', width);
     var height = heightmap[0].length-1;
+    if(height != CHUNK_SIZE_MAP) console.log('ERROR: tilemap has incorrect height:', height);
     var v1, v2, v3, v4;
 
     for(y = 0; y < height; y++) {
@@ -155,7 +157,7 @@ define(function(require, exports) {
         v4 = new THREE.Vector3((x+1)*tileScale, heightmap[x+1][y+1]/tileScale, (y+1)*tileScale);
         geometry.vertices.push(v1, v2, v3, v4);
 
-        faceIndex = (y*width+x)*4;
+        faceIndex = (y * width + x) * 4;
         if(v1.y === v4.y) {
           geometry.faces.push(new THREE.Face3(faceIndex, faceIndex+3, faceIndex+1));
           geometry.faces.push(new THREE.Face3(faceIndex, faceIndex+2, faceIndex+3));
@@ -188,15 +190,49 @@ define(function(require, exports) {
   }
 
 	var chunkspace = function(x) {
-		return Math.round(x + 5);
+		// TODO constant
+		return Math.round(x / tileScale + CHUNK_SIZE_MAP / 2);
 	}
 
-	// TODO
-	var chunkHeight = function(chunk) {
-    return chunk.heightmap[chunkspace(x)][chunkspace(y)];
+	// TODO get inbetweens currently assumes flat
+	var chunkHeight = function(chunk, x, y) {
+    return chunk.heightmap[chunkspace(x)][chunkspace(y)] / tileScale;
 	}
 
-	exports.loadChunk = function(chunkName, callback) {
+	var coordStr = function(x, y) {
+		return '' + x + ',' + y;
+	}
+
+	var strCoord = function(str) {
+		return str.split(',').map(function(coord) { return parseInt(coord); });
+	}
+
+	var chunkIndex = exports.chunkIndex = function(x, y) {
+		return ((y + 1) * 3) + (x + 1);
+	}
+
+	var loadChunk = function(chunkName, callback) {
+
+		// TODO check to see if chunk is already loaded
+		var existingChunks = world.chunks.filter(function(chunk) { return chunk.name === chunkName; });
+		if(existingChunks.length > 0) {
+			callback(existingChunks[0]);
+			return;
+		}
+
+		var afterChunk = function(loadedChunk) {
+				loadedChunk.name = chunkName;
+				
+				var coords = strCoord(chunkName);
+
+				// Main chunk position plus relative offset
+				loadedChunk.position.x += coords[0] * CHUNK_SIZE_WORLD;
+				loadedChunk.position.z += coords[1] * CHUNK_SIZE_WORLD;
+				loadedChunk.tilePosition = new THREE.Vector2(coords[0], coords[1]);
+
+				callback(loadedChunk);
+		}
+
 		// get file json
 		loadJSONAsync('./chunks/' + chunkName + '.json', function(file) {
 			var chunk = new THREE.Object3D();
@@ -204,15 +240,13 @@ define(function(require, exports) {
 			chunk.terrain = buildTerrain(file.heightmap, file.typemap);
 			chunk.add(chunk.terrain);
 
-			chunk.name = chunkName;
-			chunk.neighbors = file.neighbors;
 			chunk.heightmap = file.heightmap;
 			chunk.typemap = file.typemap;
 
 			chunk.staticObjs = [];
 			file.staticObjs.each(function(staticObj) {
 				var obj = builder.buildStaticObj(staticObj); // TODO
-				obj.position.y = chunkHeight(chunk);
+				obj.position.y = chunkHeight(chunk, obj.position.x, obj.position.z);
 				chunk.staticObjs.push(obj);
 				chunk.add(obj);
 			});
@@ -220,7 +254,7 @@ define(function(require, exports) {
 			chunk.dynamicObjs = [];
 			file.dynamicObjs.each(function(dynamicObj) {
 				var obj = builder.buildDynamicObj(dynamicObj); // TODO
-				obj.position.y = chunkHeight(chunk);
+				obj.position.y = chunkHeight(chunk, obj.position.x, obj.position.z);
 				obj.parentChunk = chunk;
 				chunk.dynamicObjs.push(obj);
 				// don't add to chunk, needs to be added to scene when loaded
@@ -228,12 +262,10 @@ define(function(require, exports) {
 				// alternate: fade out at range
 			});
 
-			callback(chunk);
+			afterChunk(chunk);
 		}, function() {
 			// File not found, load default chunk.
 			var chunk = new THREE.Object3D();
-			chunk.neighbors = {};
-			chunk.name = chunkName;
 			chunk.heightmap = DEFAULT_CHUNK_HEIGHTMAP;
 			chunk.typemap = DEFAULT_CHUNK_TYPEMAP;
 			chunk.terrain = buildTerrain(DEFAULT_CHUNK_HEIGHTMAP, DEFAULT_CHUNK_TYPEMAP);
@@ -242,19 +274,14 @@ define(function(require, exports) {
 			chunk.staticObjs = [];
 			chunk.dynamicObjs = [];
 
-			callback(chunk);
+			afterChunk(chunk);
 		});
 
 	}
 
-	var coordStr = function(x, y) {
-		return '' + x + ',' + y;
-	}
-
-	// TODO
-	exports.loadNeighbors = function(chunk, callback) {
-		// Chunkspace
-		var coords = { x: chunk.position.x, y: chunk.position.z };
+	var loadNeighbors = function(chunk, callback) {
+		// Chunktilespace
+		var coords = { x: chunk.tilePosition.x, y: chunk.tilePosition.y };
 
 		// Maps relative to chunk names (absolute coord or overridden)
 		var neighbors = {
@@ -267,46 +294,80 @@ define(function(require, exports) {
 			'-1,0': coordStr(coords.x-1, coords.y),
 			'-1,-1': coordStr(coords.x-1, coords.y-1)
 		};
-		chunk.neighbors.keys().each(function(neighborOverride) {
-			var key = neighborOverride.split(',');
-			neighbors[key] = chunk.neighbors[neighborOverride];
-		});
 
 		// Go find the chunks and position them
 		neighbors.keys().each(function(relativeCoord) {
 			var chunkName = neighbors[relativeCoord];
-			var offset = relativeCoord.split(',').map(function(coord) { return parseInt(coord); });
-			if(chunkName === 'empty') return;
-			exports.loadChunk(chunkName, function(newChunk) {
-				// TODO generalize width/height of chunk?
-				// TODO or consistently use constant
 
-				// Main chunk position plus relative offset
-				newChunk.position.x += coords.x + offset[0] * CHUNK_WIDTH;
-				newChunk.position.z += coords.y + offset[1] * CHUNK_HEIGHT;
-
-				// Return each new chunk
-				callback(newChunk);
-			});
+			loadChunk(chunkName, callback);
 		});
 	}
 
-  exports.editTerrain = function(x, y, mod) {
-  	console.log(x, y, '(world)', chunkspace(x), chunkspace(y), '(chunk)');
+	var loadChunkAndNeighbors = exports.loadChunkAndNeighbors = function(chunkName) {
 
-    // TODO edit other chunks also
-    var chunkCandidates = world.chunks.filter(function(chunk) {
-      if(chunk.position.x + CHUNK_WIDTH) { return false;}
+		console.log('loading chunk and neighbors:', chunkName);
+
+    var addChunk = world.scene.add.bind(world.scene);
+
+    loadChunk(chunkName, function(initChunk) {
+      addChunk(initChunk);
+
+      world.chunks[chunkIndex(0, 0)] = initChunk;
+      loadNeighbors(initChunk, function(chunk) {
+
+				var offset = strCoord(chunk.name);
+				offset[0] -= initChunk.tilePosition.x;
+				offset[1] -= initChunk.tilePosition.y;
+
+				// TODO don't overwrite existing chunks
+				// TODO dispose removed chunks
+      	world.chunks[chunkIndex(offset[0], offset[1])] = chunk;
+
+      });
     });
 
-    world.chunks[0].heightmap[chunkspace(x)][chunkspace(y)] += mod;
-    var newGeometry = buildTerrain(world.chunks[0].heightmap, world.chunks[0].typemap).geometry;
-    var oldGeometry = world.chunks[0].terrain.geometry;
-    oldGeometry.vertices = newGeometry.vertices;
-    oldGeometry.faces = newGeometry.faces;
-    oldGeometry.verticesNeedUpdate = true;
-    oldGeometry.elementsNeedUpdate = true;
-    newGeometry.dispose();
+	}
+
+  exports.editTerrain = function(x, y, mod) {
+		var centerChunkPos = world.chunks[chunkIndex(0, 0)].tilePosition;
+		var cx = chunkspace(x) - centerChunkPos.x;
+		var cy = chunkspace(y) - centerChunkPos.y;
+  	console.log('editing:', x, y, '(world)', cx, cy, '(chunk)');
+
+    /*
+   0x    10
+	y 0 1 2
+		3 4 5
+		6 7 8
+	10
+    */
+
+    // edit center chunk
+    // change to chunkIndex
+    editChunkGeometry(world.chunks[4], cx, cy, mod);
+    if(cx === 0) {
+    	editChunkGeometry(world.chunks[3], CHUNK_SIZE_MAP, cy, mod);
+    	if(cy === 0) {
+    		editChunkGeometry(world.chunks[0], CHUNK_SIZE_MAP, CHUNK_SIZE_MAP, mod);
+    	}
+    	if(cy === 10) {
+    		editChunkGeometry(world.chunks[6], CHUNK_SIZE_MAP, 0, mod);
+    	}
+    } else if(cx === CHUNK_SIZE_MAP) {
+    	editChunkGeometry(world.chunks[5], 0, cy, mod);
+    	if(cy === 0) {
+    		editChunkGeometry(world.chunks[2], 0, CHUNK_SIZE_MAP, mod);
+    	}
+    	if(cy === CHUNK_SIZE_MAP) {
+    		editChunkGeometry(world.chunks[8], 0, 0, mod);
+    	}
+    }
+    if(cy === 0) {
+    	editChunkGeometry(world.chunks[1], cx, CHUNK_SIZE_MAP, mod);
+    } else if(cy === CHUNK_SIZE_MAP) {
+    	editChunkGeometry(world.chunks[7], cx, 0, mod);
+    }
+
 
     // TODO update player position also
     if(mod > 0) {
@@ -314,12 +375,49 @@ define(function(require, exports) {
     }
   }
 
+  var editChunkGeometry = function(chunk, x, y, mod) {
+    chunk.heightmap[x][y] += mod;
+    var newGeometry = buildTerrain(chunk.heightmap, chunk.typemap).geometry;
+    var oldGeometry = chunk.terrain.geometry;
+
+    oldGeometry.vertices = newGeometry.vertices;
+    oldGeometry.faces = newGeometry.faces;
+    oldGeometry.verticesNeedUpdate = true;
+    oldGeometry.elementsNeedUpdate = true;
+    newGeometry.dispose();
+  }
+
+  // TODO
   exports.getChunkContainingObj = function(obj) {
   	var chunks = world.chunks;
   }
 
-  exports.chunkTracker = function(obj, chunk) {
+  // builds component that dispatches events when the obj enters/leaves the chunk
+  exports.chunkTracker = function() {
+  	// refers to object owning component
+  	var self = this;
 
+  	// return the actual component object
+  	return {
+  		'update' : function(delta) {
+  			var centerChunkPos = world.chunks[chunkIndex(0, 0)].tilePosition;
+  			var cx = chunkspace(self.position.x) - centerChunkPos.x * CHUNK_SIZE_MAP;
+  			var cy = chunkspace(self.position.z) - centerChunkPos.y * CHUNK_SIZE_MAP;
+
+  			if(cx <= -1) {
+					loadChunkAndNeighbors(world.chunks[chunkIndex(-1, 0)].name);
+  			}
+  			if(cx >= CHUNK_SIZE_MAP + 1) {
+					loadChunkAndNeighbors(world.chunks[chunkIndex(1, 0)].name);
+  			}
+  			if(cy <= -1) {
+					loadChunkAndNeighbors(world.chunks[chunkIndex(0, -1)].name);
+  			}
+  			if(cy >= CHUNK_SIZE_MAP + 1) {
+					loadChunkAndNeighbors(world.chunks[chunkIndex(0, 1)].name);
+  			}
+  		}
+  	}
   }
 
 });

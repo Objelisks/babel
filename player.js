@@ -2,6 +2,7 @@ define(function(require, exports) {
 
   var world = require('world.js');
   var input = require('input.js');
+  var terrain = require('terrain.js');
   var gameObject = require('gameObject.js');
 
   var rightStickHandler = function(event) {
@@ -72,7 +73,8 @@ define(function(require, exports) {
     var material = new THREE.MeshLambertMaterial({ color: 0xFB966E });
     var mesh = new THREE.Mesh(geometry, material);
     mesh = gameObject.construct(mesh)
-      .addComponent(playerController);
+      .addComponent(playerController)
+      .addComponent(terrain.chunkTracker);
     mesh.position.y = 0.25;
     mesh.moveSpeed = 5.0;
     mesh.height = 0.5;
