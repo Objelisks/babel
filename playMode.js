@@ -12,7 +12,7 @@ define(function(require, exports) {
 
   // Play mode init
   exports.init = function() {
-    var gridHelper = new THREE.GridHelper(20, 1);
+    var gridHelper = new THREE.GridHelper(10, 1);
     gridHelper.position.y -= 0.001;
     world.scene.add(gridHelper);
     var axisHelper = new THREE.AxisHelper();
@@ -38,16 +38,16 @@ define(function(require, exports) {
 
     for(var i=0; i<6; i++) {
       var tree = builder.buildTree();
-      tree.position.x = Math.random() * 20;
-      tree.position.z = Math.random() * 20;
+      tree.position.x = Math.random() * 20 - 10;
+      tree.position.z = Math.random() * 20 - 10;
       world.scene.add(tree);
     }
 
     builder.loadModel('grass', function(model) {
       for(var i=0; i<20; i++) {
         var grassInstance = model.clone();
-        grassInstance.position.x = Math.random() * 20;
-        grassInstance.position.z = Math.random() * 20;
+        grassInstance.position.x = Math.random() * 20 - 10;
+        grassInstance.position.z = Math.random() * 20 - 10;
         grassInstance.rotation.x = Math.random() * 0.2;
         grassInstance.rotation.y = Math.random() * 0.4;
         grassInstance.rotation.z = Math.random() * 0.2;

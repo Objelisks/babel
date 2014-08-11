@@ -12,31 +12,36 @@ define(function(require, exports) {
   // Edit mode init
   var debugObjects = [];
   var tileScale = terrain.tileScale;
+  var saveServer = 'http://localhost:3000';
 
   var lowerTerrain = function() {
     var pos = world.player.position.clone();
-    var geometry = world.chunks[0].terrain.geometry;
-    pos.set(Math.round(pos.x / tileScale) * tileScale, 0, Math.round(pos.z / tileScale) * tileScale);
-    geometry.vertices.each(function(vertex) {
-      if(vertex.x === pos.x && vertex.z === pos.z) {
-        console.log('found vertex');
-        vertex.y -= 1 / tileScale;
-      }
-    });
-    geometry.verticesNeedUpdate = true;
-  }
+    var x = Math.round(pos.x / tileScale);
+    var y = Math.round(pos.z / tileScale);
 
+    terrain.editTerrain(x, y, -1);
+  };
   var raiseTerrain = function() {
     var pos = world.player.position.clone();
-    var geometry = world.chunks[0].terrain.geometry;
-    pos.set(Math.round(pos.x / tileScale) * tileScale, 0, Math.round(pos.z / tileScale) * tileScale);
-    geometry.vertices.each(function(vertex) {
-      if(vertex.x === pos.x && vertex.z === pos.z) {
-        console.log('found vertex');
-        vertex.y += 1 / tileScale;
-      }
+    var x = Math.round(pos.x / tileScale);
+    var y = Math.round(pos.z / tileScale);
+
+    terrain.editTerrain(x, y, 1);
+  };
+
+  var saveChunks = function() {
+    sendJsonToServer(saveServer, { 'chunks':
+      world.chunks.map(function(chunk) {
+        return {
+          'name': chunk.name,
+          'heightmap': chunk.heightmap,
+          'typemap': chunk.typemap,
+          'neighbors': chunk.neighbors,
+          'staticObjs': [],
+          'dynamicObjs': []
+        };
+      })
     });
-    geometry.verticesNeedUpdate = true;
   }
 
   exports.init = function() {
@@ -45,7 +50,7 @@ define(function(require, exports) {
       new THREE.MeshLambertMaterial({ color: 0xEFBB24 }));
     selectedVertex.update = function(delta) {
       this.position.set(Math.round(world.player.position.x / tileScale) * tileScale,
-        world.player.position.y,
+        world.player.position.y + 0.25,
         Math.round(world.player.position.z / tileScale) * tileScale);
     }
     world.scene.add(selectedVertex);
@@ -60,6 +65,7 @@ define(function(require, exports) {
 
     input.primary.addEventListener('xpressed', lowerTerrain);
     input.primary.addEventListener('ypressed', raiseTerrain);
+    input.primary.addEventListener('rightshoulderpressed', saveChunks);
   }
 
   exports.deactivate = function() {
@@ -70,6 +76,7 @@ define(function(require, exports) {
 
     input.primary.removeEventListener('xpressed', lowerTerrain);
     input.primary.removeEventListener('ypressed', raiseTerrain);
+    input.primary.removeEventListener('rightshoulderpressed', saveChunks);
   }
 
 	exports.update = function(delta) {

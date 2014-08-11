@@ -62,9 +62,16 @@ function loadTextFileAjaxAsync(filePath, mimeType, callback, errorCallback) {
     }
   });
 
-try {
-  xmlhttp.send();
-} catch(e) {
-  console.log(e);
+  try {
+    xmlhttp.send();
+  } catch(e) {
+    console.log(e);
+  }
 }
+
+function sendJsonToServer(server, json) {
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open('POST', server);
+  xmlhttp.setRequestHeader('Content-Type', 'text/plain;charset=UTF-8');
+  xmlhttp.send(JSON.stringify(json));
 }

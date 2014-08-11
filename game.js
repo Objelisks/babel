@@ -6,7 +6,6 @@ define(function(require, exports) {
   var world = require('world.js');
   var input = require('input.js');
   var builder = require('builder.js');
-  var gameObject = require('gameObject.js');
   var player = require('player.js');
   var playMode = require('playMode.js');
   var editMode = require('editMode.js');
@@ -23,10 +22,7 @@ define(function(require, exports) {
   world.scene = new THREE.Scene();
   world.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-  var playerObj = gameObject.construct(builder.buildPlayer())
-    .addComponent(player.playerController);
-  playerObj.moveSpeed = 5.0;
-  playerObj.height = 0.5;
+  var playerObj = new player.Player();
 
   world.player = playerObj;
   world.scene.add(playerObj);

@@ -2,6 +2,7 @@ define(function(require, exports) {
 
   var world = require('world.js');
   var input = require('input.js');
+  var gameObject = require('gameObject.js');
 
   var rightStickHandler = function(event) {
     var axes = event.message;
@@ -57,11 +58,25 @@ define(function(require, exports) {
     world.camera.position.copy(this.position).add(cameraOffset);
   }
 
-  exports.playerController = function() {
+  var playerController = function() {
     this.moveSpeed = 0.7;
     this.height = 1.0;
     input.primary.addEventListener('leftstickmoved', leftStickHandler.bind(this));
     input.primary.addEventListener('rightstickmoved', rightStickHandler.bind(this));
     return {};
   }
+
+  // TODO make constructors consistent
+  exports.Player = function() {
+    var geometry = new THREE.SphereGeometry(0.25, 32, 32);
+    var material = new THREE.MeshLambertMaterial({ color: 0xFB966E });
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh = gameObject.construct(mesh)
+      .addComponent(playerController);
+    mesh.position.y = 0.25;
+    mesh.moveSpeed = 5.0;
+    mesh.height = 0.5;
+    return mesh;
+  }
+
 });
