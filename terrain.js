@@ -211,17 +211,20 @@ define(function(require, exports) {
 		return ((y + 1) * 3) + (x + 1);
 	}
 
-	var loadChunk = function(chunkName, callback) {
+	var loadChunk = function(chunkName, chunkCache, callback) {
 
 		// TODO check to see if chunk is already loaded
-		var existingChunks = world.chunks.filter(function(chunk) { return chunk.name === chunkName; });
-		if(existingChunks.length > 0) {
-			var existingChunk = existingChunks[0];
-			//var coords = strCoord(chunkName);
-    	//delete world.chunks[chunkIndex(coords[0], coords[1])];
-    	//world.scene.remove(existingChunk.terrain);
-			callback(existingChunk);
-			return;
+		if(chunkCache instanceof Array) {
+			var existingChunks = chunkCache.filter(function(chunk) { return chunk.name === chunkName; });
+			if(existingChunks.length > 0) {
+				var existingChunk = existingChunks[0];
+				//var coords = strCoord(chunkName);
+	    	//delete world.chunks[chunkIndex(coords[0], coords[1])];
+	    	//world.scene.remove(existingChunk.terrain);
+	    	console.log('reusing', chunkName);
+				callback(existingChunk);
+				return;
+			}
 		}
 
 		var afterChunk = function(loadedChunk) {
@@ -283,7 +286,7 @@ define(function(require, exports) {
 
 	}
 
-	var loadNeighbors = function(chunk, callback) {
+	var loadNeighbors = function(chunk, chunkCache, callback) {
 		// Chunktilespace
 		var coords = { x: chunk.tilePosition.x, y: chunk.tilePosition.y };
 
@@ -303,7 +306,7 @@ define(function(require, exports) {
 		neighbors.keys().each(function(relativeCoord) {
 			var chunkName = neighbors[relativeCoord];
 
-			loadChunk(chunkName, callback);
+			loadChunk(chunkName, chunkCache, callback);
 		});
 	}
 
@@ -316,18 +319,17 @@ define(function(require, exports) {
 		oldChunks.each(function(chunk) {
 			world.scene.remove(chunk);
 		});
-		world.chunks = [];
 
     var addChunk = function(chunk, x, y) {
     	world.chunks[chunkIndex(x, y)] = chunk;
     	world.scene.add(chunk);
     }
 
-    loadChunk(chunkName, function(initChunk) {
+    loadChunk(chunkName, oldChunks, function(initChunk) {
 
     	addChunk(initChunk, 0, 0);
 
-      loadNeighbors(initChunk, function(chunk) {
+      loadNeighbors(initChunk, oldChunks, function(chunk) {
 
 				var offset = strCoord(chunk.name);
 				offset[0] -= initChunk.tilePosition.x;
@@ -342,10 +344,8 @@ define(function(require, exports) {
 
   exports.editTerrain = function(x, y, mod) {
 		var centerChunkPos = world.chunks[chunkIndex(0, 0)].tilePosition;
-
-		// TODO fix this so it works in other chunks
-		var cx = chunkspace(x) - centerChunkPos.x;
-		var cy = chunkspace(y) - centerChunkPos.y;
+		var cx = chunkspace(x) - centerChunkPos.x * CHUNK_SIZE_MAP;
+		var cy = chunkspace(y) - centerChunkPos.y * CHUNK_SIZE_MAP;
   	console.log('editing:', x, y, '(world)', cx, cy, '(chunk)');
 
     /*
