@@ -11,7 +11,7 @@ define(function(require, exports) {
 
   var axisThreshold = 0.15;
   var floorHeight = 0;
-  var cameraOffset = new THREE.Vector3(-1.5, 2.5, -1.5);
+  var cameraOffset = new THREE.Vector3(-11.5, 12.5, -11.5);
 
   var leftStickHandler = function(event) {
     var axes = event.message;

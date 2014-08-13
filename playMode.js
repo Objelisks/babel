@@ -56,7 +56,6 @@ define(function(require, exports) {
     });
 
     terrain.loadChunkAndNeighbors('0,0');
-    terrain.loadChunkAndNeighbors('-1,0');
 
     var water = builder.buildWater();
     world.scene.add(water);

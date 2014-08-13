@@ -113,6 +113,14 @@ define(function(require, exports) {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	];
+  var terrainMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      color: { type:"v3", value: new THREE.Vector3(0.0, 1.0, 0.0) },
+      time: { type:"f", value: 1.0 }
+    },
+    vertexShader: loader.vertex('terrain'),
+    fragmentShader: loader.fragment('terrain')
+  });
 
 	// From THREE.Geometry.center
 	var centerGeometryXZ = function() {
@@ -173,15 +181,7 @@ define(function(require, exports) {
     geometry.computeBoundingSphere();
     centerGeometryXZ.call(geometry);
 
-    var material = new THREE.ShaderMaterial({
-      uniforms: {
-        color: { type:"v3", value: new THREE.Vector3(0.0, 1.0, 0.0) },
-        time: { type:"f", value: 1.0 },
-        resolution: { type: "v2", value: new THREE.Vector2() }
-      },
-      vertexShader: loader.vertex('terrain'),
-      fragmentShader: loader.fragment('terrain')
-    });
+    var material = terrainMaterial;
 
     //var material = new THREE.MeshLambertMaterial({ color: 0x00aa00 });
 
@@ -216,7 +216,11 @@ define(function(require, exports) {
 		// TODO check to see if chunk is already loaded
 		var existingChunks = world.chunks.filter(function(chunk) { return chunk.name === chunkName; });
 		if(existingChunks.length > 0) {
-			callback(existingChunks[0]);
+			var existingChunk = existingChunks[0];
+			//var coords = strCoord(chunkName);
+    	//delete world.chunks[chunkIndex(coords[0], coords[1])];
+    	//world.scene.remove(existingChunk.terrain);
+			callback(existingChunk);
 			return;
 		}
 
@@ -307,21 +311,29 @@ define(function(require, exports) {
 
 		console.log('loading chunk and neighbors:', chunkName);
 
-    var addChunk = world.scene.add.bind(world.scene);
+		// remove existing chunks first
+		var oldChunks = world.chunks.slice();
+		oldChunks.each(function(chunk) {
+			world.scene.remove(chunk);
+		});
+		world.chunks = [];
+
+    var addChunk = function(chunk, x, y) {
+    	world.chunks[chunkIndex(x, y)] = chunk;
+    	world.scene.add(chunk);
+    }
 
     loadChunk(chunkName, function(initChunk) {
-      addChunk(initChunk);
 
-      world.chunks[chunkIndex(0, 0)] = initChunk;
+    	addChunk(initChunk, 0, 0);
+
       loadNeighbors(initChunk, function(chunk) {
 
 				var offset = strCoord(chunk.name);
 				offset[0] -= initChunk.tilePosition.x;
 				offset[1] -= initChunk.tilePosition.y;
 
-				// TODO don't overwrite existing chunks
-				// TODO dispose removed chunks
-      	world.chunks[chunkIndex(offset[0], offset[1])] = chunk;
+      	addChunk(chunk, offset[0], offset[1]);
 
       });
     });
@@ -330,6 +342,8 @@ define(function(require, exports) {
 
   exports.editTerrain = function(x, y, mod) {
 		var centerChunkPos = world.chunks[chunkIndex(0, 0)].tilePosition;
+
+		// TODO fix this so it works in other chunks
 		var cx = chunkspace(x) - centerChunkPos.x;
 		var cy = chunkspace(y) - centerChunkPos.y;
   	console.log('editing:', x, y, '(world)', cx, cy, '(chunk)');
