@@ -14,16 +14,19 @@ define(function(require, exports) {
   var tileScale = terrain.tileScale;
   var saveServer = 'http://localhost:3000';
 
-  var lowerTerrain = function() {
+  var lowerTerrain = function(event) {
+    if(event.message !== 1) return;
     var pos = world.player.position;
     terrain.editTerrain(pos.x, pos.z, -1);
   };
-  var raiseTerrain = function() {
+  var raiseTerrain = function(event) {
+    if(event.message !== 1) return;
     var pos = world.player.position;
     terrain.editTerrain(pos.x, pos.z, 1);
   };
 
-  var saveChunks = function() {
+  var saveChunks = function(event) {
+    if(event.message !== 1) return;
     sendJsonToServer(saveServer, { 'chunks':
       world.chunks.map(function(chunk) {
         return {
@@ -56,9 +59,9 @@ define(function(require, exports) {
       obj.visible = true;
     });
 
-    input.primary.addEventListener('xpressed', lowerTerrain);
-    input.primary.addEventListener('ypressed', raiseTerrain);
-    input.primary.addEventListener('rightshoulderpressed', saveChunks);
+    input.primary.addEventListener('x', lowerTerrain);
+    input.primary.addEventListener('y', raiseTerrain);
+    input.primary.addEventListener('rightshoulder', saveChunks);
   }
 
   exports.deactivate = function() {
@@ -67,9 +70,9 @@ define(function(require, exports) {
       obj.visible = false;
     });
 
-    input.primary.removeEventListener('xpressed', lowerTerrain);
-    input.primary.removeEventListener('ypressed', raiseTerrain);
-    input.primary.removeEventListener('rightshoulderpressed', saveChunks);
+    input.primary.removeEventListener('x', lowerTerrain);
+    input.primary.removeEventListener('y', raiseTerrain);
+    input.primary.removeEventListener('rightshoulder', saveChunks);
   }
 
 	exports.update = function(delta) {

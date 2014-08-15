@@ -2,7 +2,7 @@
 PLAY MODE MODULE
 */
 define(function(require, exports) {
-  var builder = require('builder.js');
+  var statics = require('statics.js');
   var gameObject = require('gameObject.js');
   var input = require('input.js');
   var terrain = require('terrain.js');
@@ -26,7 +26,7 @@ define(function(require, exports) {
     light = new THREE.HemisphereLight(0xffffff, 0x404040, 0.5);
     world.scene.add(light);
 
-    var cube = builder.buildCube();
+    var cube = statics.buildCube();
     cube.position.x = 5;
     cube.position.z = -2;
     world.scene.add(cube);
@@ -37,13 +37,13 @@ define(function(require, exports) {
     world.gameObjects.push(cube);
 
     for(var i=0; i<6; i++) {
-      var tree = builder.buildTree();
+      var tree = statics.buildTree();
       tree.position.x = Math.random() * 20 - 10;
       tree.position.z = Math.random() * 20 - 10;
       world.scene.add(tree);
     }
 
-    builder.loadModel('grass', function(model) {
+    statics.loadModel('grass', function(model) {
       for(var i=0; i<20; i++) {
         var grassInstance = model.clone();
         grassInstance.position.x = Math.random() * 20 - 10;
@@ -57,7 +57,7 @@ define(function(require, exports) {
 
     terrain.loadChunkAndNeighbors('0,0');
 
-    var water = builder.buildWater();
+    var water = statics.buildWater();
     world.scene.add(water);
   }
 

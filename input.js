@@ -17,6 +17,8 @@ define(function(require, exports) {
       3: 'y',
       4: 'leftshoulder',
       5: 'rightshoulder',
+      6: 'lefttrigger',
+      7: 'righttrigger',
       8: 'back',
       9: 'start',
       10: 'leftstick',
@@ -48,14 +50,14 @@ define(function(require, exports) {
         if(this.lastButtons !== null) {
           buttons.each(function(buttonValue, buttonIndex) {
             if(self.lastButtons[buttonIndex] !== undefined
-              && buttonValue.pressed !== self.lastButtons[buttonIndex]) {
+              && buttonValue.value !== self.lastButtons[buttonIndex]) {
               self.dispatchEvent({
-                'type': buttonActionMap['joystick'][buttonIndex] + (buttonValue.pressed ? 'pressed' : 'released'),
-                'message': buttonValue,
+                'type': buttonActionMap['joystick'][buttonIndex],
+                'message': buttonValue.value,
                 'delta': delta
               });
             }
-            self.lastButtons[buttonIndex] = buttonValue.pressed;
+            self.lastButtons[buttonIndex] = buttonValue.value;
           });
         }
 

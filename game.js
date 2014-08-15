@@ -43,7 +43,8 @@ define(function(require, exports) {
     modes.each(function(mode) { mode.deactivate(); });
     world.mode.activate();
 
-    return function() {
+    return function(event) {
+      if(event.message !== 1) return;
       world.mode.deactivate();
 
       currentMode = (currentMode + 1) % modes.length;
@@ -55,7 +56,7 @@ define(function(require, exports) {
     }
   })();
 
-  input.primary.addEventListener('leftshoulderpressed', cycleMode);
+  input.primary.addEventListener('leftshoulder', cycleMode);
 
   var render = function() {
     requestAnimationFrame(render);
