@@ -19,12 +19,14 @@ define(function(require, exports) {
     return cube;
   }
 
+  var Tree = require('./statics/tree.js').Tree;
   exports.buildTree = function() {
-    var geometry = new THREE.CylinderGeometry(0.3, 0.3, 5, 6, 1);
-    var material = new THREE.MeshLambertMaterial({ color: 0xECB88A });
-    var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.y = 2.5;
-    return mesh;
+    //var geometry = new THREE.CylinderGeometry(0.3, 0.3, 5, 6, 1);
+    //var material = new THREE.MeshLambertMaterial({ color: 0xECB88A });
+    //var mesh = new THREE.Mesh(geometry, material);
+    //mesh.position.y = 2.5;
+    //return mesh;
+    return new Tree();
   }
 
   exports.buildWater = function() {

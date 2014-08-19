@@ -55,10 +55,10 @@ define(function(require, exports) {
       }
     });
 
-    terrain.loadChunkAndNeighbors('0,0');
-
     var water = statics.buildWater();
     world.scene.add(water);
+
+    terrain.loadChunkAndNeighbors('0,0');
   }
 
   exports.activate = function() {
@@ -70,8 +70,6 @@ define(function(require, exports) {
   }
 
   exports.update = function(delta) {
-    // mode switch override
-
     world.gameObjects.each(function(obj) {
       obj.update(delta);
     });

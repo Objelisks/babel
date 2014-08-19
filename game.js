@@ -1,6 +1,9 @@
 /**
 GAME MODULE
 */
+
+var updates = {};
+
 define(function(require, exports) {
 
   var world = require('world.js');
@@ -64,7 +67,26 @@ define(function(require, exports) {
     var delta = clock.getDelta();
     input.update(delta);
     world.mode.update(delta);
+    updates.keys().each(function(updateId) {
+      if(updates[updateId](delta) === true) {
+        delete updates[updateId];
+      }
+    });
   }
   render();
 
 });
+
+
+var setUpdate = (function() {
+  var id = 1;
+  return function(updateFunc) {
+    id += 1;
+    updates[id] = updateFunc;
+    return id;
+  }
+})();
+
+var clearUpdate = function(updateId) {
+  delete updates[updateId];
+}

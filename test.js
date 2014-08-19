@@ -1,20 +1,19 @@
-console.log('tests');
-define(function(require, exports) {
-  var gameObject = require('gameObject.js');
-  var results = { failed: 0, passed: 0, expected: 0 };
-  var assert = function(test) {
-    results.expected += 1;
-    if(test) {
-      results.passed += 1;
-    } else {
-      results.failed += 1;
-    }
-  }
+var tester = function() {
+  var tested = (function() {
+    var ticks = 0;
+    var timeout = 10;
+    return function(delta) {
+      ticks += delta;
+      console.log('tick', ticks);
+      if(ticks >= timeout) {
+        return true;
+      }
+    };
+  })();
 
-  try {
+  for (var i = 0; i < 20; i++) {
+    console.log(tested(1.0));
+  };
+}
 
-
-  } finally {
-    console.log('test results:', results);
-  }
-});
+tester();
