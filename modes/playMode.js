@@ -2,13 +2,11 @@
 PLAY MODE MODULE
 */
 define(function(require, exports) {
-  var statics = require('statics.js');
-  var gameObject = require('gameObject.js');
-  var input = require('input.js');
-  var terrain = require('terrain.js');
-
-  // Common mode state
-  var world = require('world.js');
+  var statics =     require('statics/statics');
+  var gameObject =  require('system/gameObject');
+  var input =       require('system/input');
+  var terrain =     require('system/terrain');
+  var world =       require('system/world');
 
   // Play mode init
   exports.init = function() {

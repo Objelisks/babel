@@ -1,8 +1,8 @@
 define(function(require, exports) {
-  var loader = require('../loader.js');
-  var statics = require('../statics.js');
-  var timing = require('../effects/timing.js');
-  var shake = require('../effects/shake.js');
+  var loader =      require('statics/loader');
+  var statics =     require('statics/statics');
+  var timing =      require('effects/timing');
+  var shake =       require('effects/shake');
 
   var treeMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 
@@ -11,8 +11,8 @@ define(function(require, exports) {
     this.rotateOnAxis(this.up, Math.random() * Math.PI);
 
     var self = this;
-    statics.loadModel('tree', function(geometry) {
-      self.add(geometry);
+    statics.loadModel('tree', function(mesh) {
+      self.add(mesh);
     });
     
     this.currentShake = null;

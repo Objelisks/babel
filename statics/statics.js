@@ -1,11 +1,9 @@
 /**
-BUILDER MODULE
+STATICS MODULE
 */
 define(function(require, exports) {
-  var loader = require('loader.js');
-  var terrain = require('terrain.js');
-
-  // TODO remove this file
+  var loader =    require('statics/loader');
+  var Tree =      require('statics/tree').Tree;
 
   exports.buildCube = function() {
     var geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -23,11 +21,12 @@ define(function(require, exports) {
   }
 
   exports.buildTree = function() {
-    var geometry = new THREE.BoxGeometry(0.3, 3, 0.3);
-    var material = new THREE.MeshLambertMaterial({ color: 0xECB88A });
-    var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.y = 1.5;
-    return mesh;
+    //var geometry = new THREE.CylinderGeometry(0.3, 0.3, 5, 6, 1);
+    //var material = new THREE.MeshLambertMaterial({ color: 0xECB88A });
+    //var mesh = new THREE.Mesh(geometry, material);
+    //mesh.position.y = 2.5;
+    //return mesh;
+    return new Tree();
   }
 
   exports.buildWater = function() {

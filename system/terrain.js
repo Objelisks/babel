@@ -15,6 +15,9 @@
 TERRAIN MODULE
 */
 define(function(require, exports) {
+  var world = require('system/world');
+  var loader = require('statics/loader');
+
 
 // load location
 // create initial chunk
@@ -79,10 +82,6 @@ define(function(require, exports) {
 	],
 }
 */
-	var builder = require('builder.js');
-	var world = require('world.js');
-	var loader = require('loader.js');
-
 	// TODO position chunks
 	var tileScale = exports.tileScale = 2;
 	var CHUNK_SIZE_MAP = 10;
@@ -252,7 +251,7 @@ define(function(require, exports) {
 
 			chunk.staticObjs = [];
 			file.staticObjs.each(function(staticObj) {
-				var obj = builder.buildStaticObj(staticObj); // TODO
+				var obj = statics.buildStaticObj(staticObj); // TODO
 				obj.position.y = chunkHeight(chunk, obj.position.x, obj.position.z);
 				chunk.staticObjs.push(obj);
 				chunk.add(obj);
@@ -260,7 +259,7 @@ define(function(require, exports) {
 
 			chunk.dynamicObjs = [];
 			file.dynamicObjs.each(function(dynamicObj) {
-				var obj = builder.buildDynamicObj(dynamicObj); // TODO
+				var obj = statics.buildDynamicObj(dynamicObj); // TODO
 				obj.position.y = chunkHeight(chunk, obj.position.x, obj.position.z);
 				obj.parentChunk = chunk;
 				chunk.dynamicObjs.push(obj);

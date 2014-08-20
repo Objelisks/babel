@@ -2,12 +2,10 @@
 EDIT MODE MODULE
 */
 define(function(require, exports) {
-	var terrain = require('terrain.js');
-  var input = require('input.js');
-	var gameObject = require('gameObject.js');
-
-	// Common mode state
-	var world = require('world.js');
+	var terrain =       require('system/terrain');
+  var input =         require('system/input');
+	var gameObject =    require('system/gameObject');
+  var world =         require('system/world');
 
   // Edit mode init
   var debugObjects = [];

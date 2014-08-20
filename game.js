@@ -6,13 +6,12 @@ var updates = {};
 
 define(function(require, exports) {
 
-  var world = require('world.js');
-  var input = require('input.js');
-  var builder = require('builder.js');
-  var player = require('player.js');
-  var playMode = require('playMode.js');
-  var editMode = require('editMode.js');
-  var terrain = require('terrain.js');
+  var world =       require('system/world');
+  var input =       require('system/input');
+  var Player =      require('player/player');
+  var playMode =    require('modes/playMode');
+  var editMode =    require('modes/editMode');
+  var terrain =     require('system/terrain');
 
   // run tests
   //require('test.js');
@@ -26,7 +25,7 @@ define(function(require, exports) {
   world.scene = new THREE.Scene();
   world.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-  var playerObj = new player.Player();
+  var playerObj = new Player();
 
   world.player = playerObj;
   world.scene.add(playerObj);
