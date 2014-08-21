@@ -10,7 +10,7 @@ define(function(require, exports) {
   exports.shaker = function(obj) {
     obj.shake = function(dir) {
       var self = this;
-      var originalPosition = this.position.clone();
+      var originalPosition = this.up.clone();
       var originalRotation = this.quaternion.clone();
       var shakeVelocity = dir.clone().multiplyScalar(shakeStrength);
       var shakePosition = new THREE.Vector2();

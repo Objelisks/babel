@@ -39,6 +39,7 @@ define(function(require, exports) {
       tree.position.x = Math.random() * 20 - 10;
       tree.position.z = Math.random() * 20 - 10;
       world.scene.add(tree);
+      world.trees.push(tree);
     }
 
     statics.loadModel('grass', function(model) {

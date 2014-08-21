@@ -9,6 +9,7 @@ define(function(require, exports) {
   exports.Tree = function() {
     THREE.Object3D.call(this);
     this.rotateOnAxis(this.up, Math.random() * Math.PI);
+    this.isGameObject = true;
 
     var self = this;
     statics.loadModel('tree', function(mesh) {
@@ -17,10 +18,10 @@ define(function(require, exports) {
     
     this.currentShake = null;
 
-    shake.shaker(this);
     this.shake(new THREE.Vector2(Math.random(), Math.random()));
   }
 
   exports.Tree.prototype = Object.create(THREE.Object3D.prototype);
 
+  shake.shaker(exports.Tree.prototype);
 });

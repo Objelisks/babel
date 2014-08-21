@@ -104,10 +104,12 @@ define(function(require, exports) {
 
     this.bow = new Bow();
     this.stick = new Stick();
+    this.bow.visible = false;
 
-    this.item = this.bow;
+    this.item = this.stick;
 
     this.add(this.bow);
+    this.add(this.stick);
   }
 
   Player.prototype = Object.create(THREE.Object3D.prototype);

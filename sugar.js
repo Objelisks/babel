@@ -8,6 +8,18 @@ Object.defineProperty(Object.prototype, 'keys', {
   enumerable: false,
 });
 
+Object.defineProperty(Math, 'sign', {
+  value: function sign(x) {
+  if(isNaN(x)) {
+    return NaN;
+  } else if(x === 0) {
+    return x;
+  } else {
+    return (x > 0 ? 1 : -1);
+  }},
+  enumerable: false,
+})
+
 // Load JSON text from server hosted file and return JSON parsed object
 function loadJSON(filePath) {
   // Load json file;

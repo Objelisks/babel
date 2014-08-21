@@ -7,4 +7,5 @@ define({
 	
 	camera: null,
 	player: null,
+  trees: [],
 });
