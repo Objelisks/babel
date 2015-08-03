@@ -11,7 +11,7 @@ install [node.js](http://nodejs.org/)
 run `node server.js` in command line
 
 go to [http://localhost:8080/](http://localhost:8080/) in your web browser of choice (chrome)
-press a button on your game controller (alos you need a game controller)
+press a button on your game controller (also you need a game controller)
 
 to save files run `node chunkSaver.js` as well
 
