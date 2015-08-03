@@ -18,8 +18,9 @@ to save files run `node chunkSaver.js` as well
 controls
 ========
 Xbox 360 Wired Controller is only thing that is tested currently, but should support any gamepad.
-left stick: movement
-left shoulder: toggle edit mode
-right shoulder (edit): save chunks to file
-x (edit): lower terrain
-y (edit): raise terrain
+*left stick: movement
+*right stick: swing stick
+*left shoulder: toggle edit mode
+*right shoulder (edit): save chunks to file
+*x (edit): lower terrain
+*y (edit): raise terrain
