@@ -1,19 +1,16 @@
 babel
 =====
 
-game thing
-
 running
 =======
 
 install [node.js](http://nodejs.org/)
 
-run `node server.js` in command line
+run `node server.js` in command line from the top directory
 
-go to [http://localhost:8080/](http://localhost:8080/) in your web browser of choice (chrome)
-press a button on your game controller (also you need a game controller)
+go to [http://localhost:8080/](http://localhost:8080/) in your web browser of choice (chrome) and then press a button on your game controller (also you need a game controller)
 
-to save files run `node chunkSaver.js` as well
+to save files run `node chunkSaver.js` as well (this isn't required to just play around with it)
 
 controls
 ========
